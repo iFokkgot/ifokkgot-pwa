@@ -1,140 +1,244 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>iFokkgot</title>
-<meta name="theme-color" content="#0b0b0f">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>iFokkgot — Reminders</title>
+<meta name="theme-color" content="#0b0b0f" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
 <style>
-  :root{--bg:#0b0b0f;--fg:#f5f7fb;--muted:#b0b3c0;--accent1:#00f5d4;--accent2:#ff4d6d;--accent3:#5b8cff;}
-  body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-  header{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #151520;background:#0b0b0fcc;backdrop-filter:saturate(140%) blur(10px);position:sticky;top:0}
-  .app{max-width:520px;margin:0 auto;padding:18px}
-  .logo{font-weight:900;font-size:20px}
-  .tag{font-size:12px;color:var(--muted)}
-  .big{font-size:34px;line-height:1.05;margin:22px 0 6px}
-  .card{background:#12121a;border:1px solid #1b1b25;border-radius:14px;padding:14px;margin:10px 0}
-  .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;border-radius:12px;padding:14px;border:1px solid #1b1b25;background:#14141d;color:var(--fg);font-weight:700;cursor:pointer}
-  .btn.full{width:100%}.btn.accent{background:linear-gradient(135deg,var(--accent2),var(--accent3));border:none}
-  .pill{padding:6px 10px;border:1px solid #20202b;border-radius:999px;font-size:12px;color:var(--muted);display:inline-block;margin-right:8px}
-  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .col{background:#101018;border:1px dashed #252535;border-radius:14px;padding:10px;min-height:150px}
-  .task{background:#171725;border:1px solid #28283a;border-radius:10px;padding:10px;margin:8px 0;font-size:14px}
+  :root{
+    --bg:#0b0b0f; --panel:#12121a; --line:#1b1b25;
+    --fg:#f5f7fb; --muted:#a8aab6; --accent:#00f5d4; --alert:#ff4d6d;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font-family:Inter, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif}
+  header{position:sticky;top:0;z-index:5;backdrop-filter:saturate(140%) blur(8px);
+    background:#0b0b0fcc;border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center}
+  .logo{font-weight:900;letter-spacing:.3px}
+  .pill{margin-left:auto;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+  .wrap{max-width:680px;margin:0 auto;padding:14px 16px 88px}
+  .row{display:flex;gap:10px}
+  .input{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 12px;color:var(--fg);outline:none}
+  .btn{background:#161623;border:1px solid var(--line);color:var(--fg);padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:700}
+  .btn.accent{background:var(--accent);color:#08120f;border:none}
+  .btn.ghost{background:#12121a}
+  .stack{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:8px 10px;font-size:12px;color:var(--muted);cursor:pointer}
+  h2{margin:22px 0 8px;font-size:14px;color:var(--muted);letter-spacing:.3px}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .item{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .top{display:flex;align-items:center;gap:10px}
+  .title{font-weight:700;flex:1}
   .time{font-size:12px;color:var(--muted)}
-  nav{position:sticky;bottom:0;background:#0b0b0fcc;border-top:1px solid #151520;display:flex}
-  nav a{flex:1;text-align:center;padding:12px 8px;font-size:12px;color:var(--muted);text-decoration:none}
-  nav a.active{color:var(--fg);font-weight:700}
+  .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .snooze{padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:12px;cursor:pointer;background:#14141d}
+  .done{padding:8px 12px;border-radius:10px;border:1px solid var(--line);cursor:pointer;background:#152018}
+  .danger{background:#2a1216;border-color:#3a1a20}
+  nav{position:fixed;left:0;right:0;bottom:0;background:#0b0b0fcc;border-top:1px solid var(--line);display:flex}
+  nav a{flex:1;text-align:center;padding:12px 6px;font-size:12px;color:var(--muted);text-decoration:none}
+  nav a.active{color:var(--fg);font-weight:800}
+  .empty{color:var(--muted);border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center}
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <div class="logo">iFokkgot</div>
-    <div class="tag">When your brain tabs crash</div>
-  </div>
-  <div class="pill" id="todayTag"></div>
+  <div class="logo">iFokkgot</div>
+  <div class="pill" id="today"></div>
 </header>
 
-<main class="app">
-  <section id="home">
-    <h1 class="big">Top 3 for Today</h1>
-    <div id="top3"></div>
-    <div class="card">
-      <span class="pill">🎯 Tiny step</span>
-      <span class="pill">💧 Hydrate</span>
-      <span class="pill">🧠 One thing now</span>
-    </div>
-    <button class="btn full accent" id="quickBtn">+ FOkk, I just remembered…</button>
-    <h2 style="color:var(--muted)">Quick Links</h2>
-    <div class="grid">
-      <a class="card" href="#nudges">⏰ Nudges</a>
-      <a class="card" href="#board">📋 Board</a>
-      <a class="card" href="#settings">⚙️ Settings</a>
-    </div>
-  </section>
+<main class="wrap">
+  <!-- Quick Add like Due -->
+  <div class="row">
+    <input id="what" class="input" placeholder="FOkk, I just remembered…" />
+    <button id="add" class="btn accent">Add</button>
+  </div>
+  <div class="stack">
+    <span class="chip" data-min="5">+5m</span>
+    <span class="chip" data-min="10">+10m</span>
+    <span class="chip" data-min="60">+1h</span>
+    <span class="chip" data-min="-1" id="chip-tomorrow">Tomorrow</span>
+  </div>
 
-  <section id="nudges" style="margin-top:24px">
-    <h1 class="big">Today’s Nudges</h1>
-    <div id="nudgeList"></div>
-  </section>
+  <h2>Reminders</h2>
+  <div id="list" class="list"></div>
 
-  <section id="board" style="margin-top:24px">
-    <h1 class="big">Master Board</h1>
-    <div class="col">
-      <div id="todo"></div>
-    </div>
-  </section>
+  <h2>Presets (Nudges)</h2>
+  <div class="stack" id="presets"></div>
 
-  <section id="settings" style="margin:24px 0 60px">
-    <h1 class="big">Settings</h1>
-    <div class="card">
-      <label>Daily Nudges</label>
-      <select id="nudgePreset">
-        <option value="std">11:00 · 14:00 · 17:00 · 21:00</option>
-        <option value="lite">11:00 · 21:00</option>
-        <option value="more">Every 2 hours 11:00 → 21:00</option>
-      </select>
-    </div>
-  </section>
+  <div style="height:24px"></div>
+  <div class="empty" id="empty" style="display:none">Nothing here yet. Add one and I’ll bug you until it’s done 😈</div>
 </main>
 
 <nav>
-  <a class="active" href="#home">Home</a>
-  <a href="#nudges">Nudges</a>
+  <a class="active" href="#">Reminders</a>
   <a href="#board">Board</a>
   <a href="#settings">Settings</a>
 </nav>
 
 <script>
-// Register PWA
+/* ---------- PWA SW ---------- */
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
+}
+
+/* ---------- Helpers ---------- */
+const $ = sel => document.querySelector(sel);
+const fmt = ts => new Date(ts).toLocaleString([], {hour:'2-digit', minute:'2-digit', month:'short', day:'numeric'});
+const now = () => Date.now();
+const inMin = m => (m === -1) ? (new Date(new Date().setDate(new Date().getDate()+1)).setHours(9,0,0,0)) : (now() + m*60*1000);
+
+/* ---------- Storage ---------- */
+const KEY = 'ifokkgot.reminders.v1';
+const load = () => JSON.parse(localStorage.getItem(KEY) || '[]');
+const save = list => localStorage.setItem(KEY, JSON.stringify(list));
+
+/* ---------- Notifications (best effort in PWA) ---------- */
+async function maybeNotify(title) {
+  try {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') await Notification.requestPermission();
+    if (Notification.permission === 'granted') new Notification('iFokkgot', { body: title });
+  } catch {}
+}
+
+/* ---------- Data ---------- */
+let items = load();
+const presets = [
+  { label:'11:00', ts: nextAt(11,0) },
+  { label:'14:00', ts: nextAt(14,0) },
+  { label:'17:00', ts: nextAt(17,0) },
+  { label:'21:00', ts: nextAt(21,0) },
+];
+
+function nextAt(h, m){
+  const d = new Date();
+  d.setMilliseconds(0); d.setSeconds(0); d.setMinutes(m); d.setHours(h);
+  if (d.getTime() <= Date.now()) d.setDate(d.getDate()+1);
+  return d.getTime();
+}
+
+/* ---------- UI ---------- */
+function render(){
+  $('#today').textContent = new Date().toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
+  const list = $('#list');
+  list.innerHTML = '';
+  const sorted = [...items].sort((a,b)=>a.when - b.when);
+  if (!sorted.length) $('#empty').style.display = 'block'; else $('#empty').style.display = 'none';
+
+  sorted.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'item';
+    row.innerHTML = `
+      <div class="top">
+        <div class="title">${escapeHtml(it.title)}</div>
+        <div class="time">${fmt(it.when)}</div>
+      </div>
+      <div class="actions">
+        <button class="snooze" data-min="5">+5m</button>
+        <button class="snooze" data-min="10">+10m</button>
+        <button class="snooze" data-min="60">+1h</button>
+        <button class="snooze" data-min="-1">Tomorrow</button>
+        <button class="done">Done</button>
+        <button class="done danger">Delete</button>
+      </div>
+    `;
+    // handlers
+    row.querySelectorAll('.snooze').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        const min = parseInt(e.target.getAttribute('data-min'),10);
+        it.when = inMin(min);
+        save(items); render();
+      });
+    });
+    row.querySelector('.done').addEventListener('click', ()=>{
+      // mark done removes with a tiny satisfaction ping
+      items = items.filter(x => x.id !== it.id);
+      save(items); render();
+    });
+    row.querySelector('.danger').addEventListener('click', ()=>{
+      items = items.filter(x => x.id !== it.id);
+      save(items); render();
+    });
+    list.appendChild(row);
+  });
+
+  // render presets row
+  const p = $('#presets'); p.innerHTML = '';
+  presets.forEach(pp=>{
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.textContent = pp.label;
+    c.title = new Date(pp.ts).toLocaleString();
+    c.addEventListener('click', ()=>{
+      const t = $('#what').value.trim();
+      if (!t) return;
+      addReminder(t, pp.ts); $('#what').value='';
+    });
+    p.appendChild(c);
   });
 }
 
-const data = {
-  tasks: [
-    {title:'Upload iFokkgot to Netlify', hint:'Use Netlify Drop', stage:'todo'},
-    {title:'Bind ifokkgot.app domain', hint:'Add DNS in Namecheap', stage:'todo'},
-    {title:'Install on iPhone', hint:'Add to Home Screen', stage:'todo'}
-  ],
-  nudges: [
-    {time:'11:00', text:'Choose 3 priorities & a tiny starter.'},
-    {time:'14:00', text:'Hydrate + push one task forward.'},
-    {time:'17:00', text:'Finish one small thing.'},
-    {time:'21:00', text:'Wrap-up: done vs wait.'}
-  ]
-};
+function escapeHtml(s){ return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
-function render(){
-  const d = new Date();
-  document.getElementById('todayTag').textContent =
-    d.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
-
-  const top3 = data.tasks.slice(0,3).map(t =>
-    `<div class="card"><b>${t.title}</b><div class="time">Tiny step → ${t.hint}</div></div>`
-  ).join('');
-  document.getElementById('top3').innerHTML = top3;
-
-  document.getElementById('nudgeList').innerHTML = data.nudges.map(n =>
-    `<div class="card"><b>${n.text}</b><div class="time">${n.time}</div></div>`
-  ).join('');
-
-  document.getElementById('todo').innerHTML = data.tasks.map(t =>
-    `<div class="task">${t.title}<div class="time">${t.hint}</div></div>`
-  ).join('');
+/* ---------- Core actions (Due-like) ---------- */
+function addReminder(title, whenTs){
+  const r = { id: crypto.randomUUID(), title, when: whenTs ?? inMin(5) };
+  items.push(r); save(items); render();
+  scheduleCheck(r); maybeNotify(`Scheduled: ${title}`);
 }
-render();
 
-document.getElementById('quickBtn').addEventListener('click', ()=>{
-  const t = prompt('Quick dump — what did you just remember?');
-  if(!t) return;
-  data.tasks.unshift({title:t, hint:'Start with 3–5 min', stage:'todo'});
-  render();
+/* Quick add */
+$('#add').addEventListener('click', ()=>{
+  const t = $('#what').value.trim(); if(!t) return;
+  addReminder(t, inMin(5)); $('#what').value='';
 });
+$('#what').addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ $('#add').click(); }
+});
+
+/* Quick chips */
+document.querySelectorAll('.chip[data-min]').forEach(ch=>{
+  ch.addEventListener('click', ()=>{
+    const t = $('#what').value.trim(); if(!t) return;
+    const min = parseInt(ch.getAttribute('data-min'),10);
+    addReminder(t, inMin(min)); $('#what').value='';
+  });
+});
+
+/* Tomorrow chip sets 9:00 tomorrow by default */
+document.getElementById('chip-tomorrow').addEventListener('click', ()=>{
+  const t = $('#what').value.trim(); if(!t) return;
+  const d = new Date(); d.setDate(d.getDate()+1); d.setHours(9,0,0,0);
+  addReminder(t, d.getTime()); $('#what').value='';
+});
+
+/* ---------- “Nag” loop (lightweight) ---------- */
+/* This checks every 30s and pings if something is due and not dismissed. 
+   (Real persistent nags need native app/Expo; this is PWA-friendly.) */
+function scheduleCheck(rem){
+  // immediate check
+  checkDue();
+}
+setInterval(checkDue, 30_000);
+
+let lastNotifiedId = null;
+function checkDue(){
+  const due = items.filter(it => it.when <= Date.now());
+  if (due.length){
+    const first = due[0];
+    if (first.id !== lastNotifiedId){
+      maybeNotify(`⏰ ${first.title} — time! (+5m / +10m / +1h / Tomorrow)`);
+      lastNotifiedId = first.id;
+    }
+  }
+}
+
+/* ---------- Init ---------- */
+render();
+items.forEach(scheduleCheck);
 </script>
 </body>
 </html>
