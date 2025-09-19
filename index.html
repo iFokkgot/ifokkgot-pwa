@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>iFokkgot</title>
+<meta name="theme-color" content="#0b0b0f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root{--bg:#0b0b0f;--fg:#f5f7fb;--muted:#b0b3c0;--accent1:#00f5d4;--accent2:#ff4d6d;--accent3:#5b8cff;}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #151520;background:#0b0b0fcc;backdrop-filter:saturate(140%) blur(10px);position:sticky;top:0}
+  .app{max-width:520px;margin:0 auto;padding:18px}
+  .logo{font-weight:900;font-size:20px}
+  .tag{font-size:12px;color:var(--muted)}
+  .big{font-size:34px;line-height:1.05;margin:22px 0 6px}
+  .card{background:#12121a;border:1px solid #1b1b25;border-radius:14px;padding:14px;margin:10px 0}
+  .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;border-radius:12px;padding:14px;border:1px solid #1b1b25;background:#14141d;color:var(--fg);font-weight:700;cursor:pointer}
+  .btn.full{width:100%}.btn.accent{background:linear-gradient(135deg,var(--accent2),var(--accent3));border:none}
+  .pill{padding:6px 10px;border:1px solid #20202b;border-radius:999px;font-size:12px;color:var(--muted);display:inline-block;margin-right:8px}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .col{background:#101018;border:1px dashed #252535;border-radius:14px;padding:10px;min-height:150px}
+  .task{background:#171725;border:1px solid #28283a;border-radius:10px;padding:10px;margin:8px 0;font-size:14px}
+  .time{font-size:12px;color:var(--muted)}
+  nav{position:sticky;bottom:0;background:#0b0b0fcc;border-top:1px solid #151520;display:flex}
+  nav a{flex:1;text-align:center;padding:12px 8px;font-size:12px;color:var(--muted);text-decoration:none}
+  nav a.active{color:var(--fg);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">iFokkgot</div>
+    <div class="tag">When your brain tabs crash</div>
+  </div>
+  <div class="pill" id="todayTag"></div>
+</header>
+
+<main class="app">
+  <section id="home">
+    <h1 class="big">Top 3 for Today</h1>
+    <div id="top3"></div>
+    <div class="card">
+      <span class="pill">🎯 Tiny step</span>
+      <span class="pill">💧 Hydrate</span>
+      <span class="pill">🧠 One thing now</span>
+    </div>
+    <button class="btn full accent" id="quickBtn">+ FOkk, I just remembered…</button>
+    <h2 style="color:var(--muted)">Quick Links</h2>
+    <div class="grid">
+      <a class="card" href="#nudges">⏰ Nudges</a>
+      <a class="card" href="#board">📋 Board</a>
+      <a class="card" href="#settings">⚙️ Settings</a>
+    </div>
+  </section>
+
+  <section id="nudges" style="margin-top:24px">
+    <h1 class="big">Today’s Nudges</h1>
+    <div id="nudgeList"></div>
+  </section>
+
+  <section id="board" style="margin-top:24px">
+    <h1 class="big">Master Board</h1>
+    <div class="col">
+      <div id="todo"></div>
+    </div>
+  </section>
+
+  <section id="settings" style="margin:24px 0 60px">
+    <h1 class="big">Settings</h1>
+    <div class="card">
+      <label>Daily Nudges</label>
+      <select id="nudgePreset">
+        <option value="std">11:00 · 14:00 · 17:00 · 21:00</option>
+        <option value="lite">11:00 · 21:00</option>
+        <option value="more">Every 2 hours 11:00 → 21:00</option>
+      </select>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <a class="active" href="#home">Home</a>
+  <a href="#nudges">Nudges</a>
+  <a href="#board">Board</a>
+  <a href="#settings">Settings</a>
+</nav>
+
+<script>
+// Register PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+
+const data = {
+  tasks: [
+    {title:'Upload iFokkgot to Netlify', hint:'Use Netlify Drop', stage:'todo'},
+    {title:'Bind ifokkgot.app domain', hint:'Add DNS in Namecheap', stage:'todo'},
+    {title:'Install on iPhone', hint:'Add to Home Screen', stage:'todo'}
+  ],
+  nudges: [
+    {time:'11:00', text:'Choose 3 priorities & a tiny starter.'},
+    {time:'14:00', text:'Hydrate + push one task forward.'},
+    {time:'17:00', text:'Finish one small thing.'},
+    {time:'21:00', text:'Wrap-up: done vs wait.'}
+  ]
+};
+
+function render(){
+  const d = new Date();
+  document.getElementById('todayTag').textContent =
+    d.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+
+  const top3 = data.tasks.slice(0,3).map(t =>
+    `<div class="card"><b>${t.title}</b><div class="time">Tiny step → ${t.hint}</div></div>`
+  ).join('');
+  document.getElementById('top3').innerHTML = top3;
+
+  document.getElementById('nudgeList').innerHTML = data.nudges.map(n =>
+    `<div class="card"><b>${n.text}</b><div class="time">${n.time}</div></div>`
+  ).join('');
+
+  document.getElementById('todo').innerHTML = data.tasks.map(t =>
+    `<div class="task">${t.title}<div class="time">${t.hint}</div></div>`
+  ).join('');
+}
+render();
+
+document.getElementById('quickBtn').addEventListener('click', ()=>{
+  const t = prompt('Quick dump — what did you just remember?');
+  if(!t) return;
+  data.tasks.unshift({title:t, hint:'Start with 3–5 min', stage:'todo'});
+  render();
+});
+</script>
+</body>
+</html>
